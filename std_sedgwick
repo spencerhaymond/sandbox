@@ -1,0 +1,154 @@
+-- exploratory queries from Selene 9/16/24
+
+WITH
+claim_attributes AS (
+    SELECT * EXCEPT(rn) FROM (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (PARTITION BY claim_uid ORDER BY date_status_updated DESC) AS rn
+        FROM `eiq-production`.`sedgwick_std_snapshot`.`int_claim_timeslices`
+    )
+    WHERE rn = 1
+),
+
+claimant_information AS (
+    SELECT * EXCEPT(rn) FROM (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (PARTITION BY claim_uid, hr_master_uid ORDER BY raw_file_date DESC) AS rn
+        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_claimant_information`
+    )
+    WHERE rn = 1
+),
+occupation_information AS (
+    SELECT * EXCEPT(rn) FROM (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (PARTITION BY hr_master_uid ORDER BY date_history_effective DESC, raw_file_date DESC) AS rn
+        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_occupation_information`
+    )
+    WHERE rn = 1
+),
+employee_information AS (
+    SELECT * EXCEPT(rn) FROM (
+        SELECT
+            *,
+            ROW_NUMBER() OVER (PARTITION BY hr_master_uid ORDER BY raw_file_date DESC) AS rn
+        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_employee_information`
+    )
+    WHERE rn = 1
+),
+benefit_summary AS (
+    SELECT * EXCEPT(rn) FROM (
+        SELECT
+            *,
+            case
+    wait_period_freq
+    when 'da' then make_interval(day => wait_period)
+    when 'we' then make_interval(day => wait_period * 7)
+    when 'bi' then make_interval(day => wait_period * 14)
+    when 'mo' then make_interval(month => wait_period)
+    else make_interval(day => wait_period)
+end as wait_period_interval,
+            case
+    max_benefit_dur_freq
+    when 'da' then make_interval(day => max_benefit_duration)
+    when 'we' then make_interval(day => max_benefit_duration * 7)
+    when 'bi' then make_interval(day => max_benefit_duration * 14)
+    when 'mo' then make_interval(month => max_benefit_duration)
+    else make_interval(day => max_benefit_duration)
+end as max_benefit_duration_interval,
+            ROW_NUMBER() OVER (PARTITION BY client_number, plan_number, line_number, coverage_number, benefit_number, benefit_version
+                                ORDER BY date_inception DESC, raw_file_date DESC) AS rn
+        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_benefit_summary`
+    )
+    WHERE rn = 1
+),
+
+terminal_table AS (
+select
+    attributes.*,
+    idmap.best_claim_id AS id_claim_group_id,
+    claimant.* except (claim_uid, client_number, raw_file_date),
+    occupation.* except (hr_master_uid, client_number, raw_file_date),
+    employee.* except (hr_master_uid, raw_file_date),
+    benefit.* except (
+        plan_number,
+        line_number,
+        coverage_number,
+        benefit_number,
+        benefit_version,
+        client_number,
+        raw_file_date,
+        max_benefit_duration
+    ),
+    client_map.client_name,
+    plan.duration as plan_duration_days,
+    /*
+        See Slack discussion[^1] for calculation logic here: Sedgwick themselves compute
+        this on the fly. We try first to use the interval provided from the plan
+        duration in our seed file[^2], per feedback from Sedgwick[^3], and fall back to
+        the benefit summary table otherwise.
+        NOTE: We are *not* currently including waiting period here as it seems to throw
+        the numbers off -- see further Slack discussion[^4].
+
+        [^1]: https://evolution.slack.com/archives/C03U3389U2Y/p1713556681373799
+        [^2]: https://github.com/EvolutionIQ/std-cdf-pipeline/blob/main/eiq/cdf_pipeline/clients/sedgwick/dbt/seeds/benefit_plan_duration.csv
+        [^3]: https://evolution.slack.com/archives/C03U3389U2Y/p1724701264041549?thread_ts=1724337956.983579&cid=C03U3389U2Y
+        [^4]: https://evolution.slack.com/archives/C04RRGAH82Y/p1723210476171699
+    */
+    cast(
+        coalesce(
+            nullif(
+                cast(date_add(attributes.date_of_loss, interval plan.duration day) as date),
+                cast(attributes.date_of_loss as date)
+            ),
+            (cast(attributes.date_of_loss as date) + benefit.max_benefit_duration_interval)
+        ) as timestamp
+    ) as max_benefit_duration,
+  coalesce(benefit_id_mapping.should_keep, true) != false AS should_keep_check
+from claim_attributes as attributes
+left join claimant_information as claimant on attributes.claim_uid = claimant.claim_uid
+left join
+    occupation_information as occupation
+    on claimant.hr_master_uid = occupation.hr_master_uid
+left join
+    employee_information as employee on claimant.hr_master_uid = employee.hr_master_uid
+left join
+    benefit_summary as benefit
+    on attributes.plan_number = benefit.plan_number
+    and attributes.line_number = benefit.line_number
+    and attributes.coverage_number = benefit.coverage_number
+    and attributes.benefit_number = benefit.benefit_number
+    and attributes.benefit_version = benefit.benefit_version
+    and attributes.client_number = benefit.client_number
+left join
+    `eiq-production`.`sedgwick_std_snapshot`.`client_number_mapping` as client_map
+    on attributes.client_number = client_map.client_number
+left join
+    `eiq-production`.`sedgwick_std_snapshot`.`benefit_plan_duration` as plan
+    on benefit.benefit_id = plan.plan_id
+    and benefit.client_number = cast(plan.client_number as string)
+left join `eiq-production`.`sedgwick_std_snapshot`.`int_id_map` as idmap on attributes.claim_uid = idmap.claim_uid
+left join
+    `eiq-production`.`sedgwick_std_snapshot`.`benefit_id_mapping` as benefit_id_mapping
+    on benefit.client_number = benefit_id_mapping.client_number
+    and benefit.benefit_id = benefit_id_mapping.benefit_id
+-- Here we filter out the claims that we are fairly sure are *not* STD claims,
+-- based on the benefit type. See https://evolution.slack.com/archives/C03U3389U2Y/p1724265050578749?thread_ts=1724252482.315349&cid=C03U3389U2Y
+-- where coalesce(benefit_id_mapping.should_keep, true) != false
+order by attributes.claim_uid
+)
+
+-- SELECT DISTINCT claim_uid
+-- FROM terminal_table
+-- WHERE examiner LIKE "%tuttle%"
+-- AND benefit_id IN ("FLEX 26WK60", "FLX 26WK60 MINS")
+
+SELECT n.*, tt.formatted_file_number
+FROM terminal_table AS tt
+INNER JOIN eiq-production.sedgwick_std_snapshot.cln_notes AS n
+ON tt.claim_uid = n.claim_uid
+WHERE examiner LIKE "%tuttle%"
+AND benefit_id = "AS U24 32WK50"
+AND LOWER(note_text) LIKE "%std%"
