@@ -1,154 +1,230 @@
--- exploratory queries from Selene 9/16/24
+  truncate table eiq-development.spencer_sedgwick_labels.benefit_id_labels; 
 
-WITH
-claim_attributes AS (
-    SELECT * EXCEPT(rn) FROM (
-        SELECT
-            *,
-            ROW_NUMBER() OVER (PARTITION BY claim_uid ORDER BY date_status_updated DESC) AS rn
-        FROM `eiq-production`.`sedgwick_std_snapshot`.`int_claim_timeslices`
-    )
-    WHERE rn = 1
-),
+ INSERT INTO eiq-development.spencer_sedgwick_labels.benefit_id_labels
+ (client_number, benefit_id, jr_benefit_id, benefit_type, should_keep) 
+ VALUES ('2265', 'STD', 'STD', 'STD', 'Yes')
+,('2285', 'ST1BW', 'Assuming STD', 'STD', 'Yes')
+,('2285', 'ST1BWFA', 'Assuming STD', 'STD', 'Yes')
+,('2285', 'OJIBWFA', 'WC', 'STD', 'No')
+,('2285', 'OJIBW', 'WC', 'WC', 'No')
+,('2285', 'ST2BW', 'Assuming STD', 'WC', 'Yes')
+,('2285', '999BW', 'Unknown', 'STD', 'No')
+,('2285', 'ST2BWFA', 'Assuming STD', 'Unknown', 'Yes')
+,('2285', '999BWFA', 'Unknown', 'STD', 'No')
+,('2285', 'ST1SM', 'Assuming STD', 'Unknown', 'Yes')
+,('2285', 'ST1SMFA', 'Assuming STD', 'STD', 'Yes')
+,('2285', '999SM', 'Unknown', 'STD', 'No')
+,('2285', 'OJISMFA', 'WC', 'Unknown', 'No')
+,('2285', 'ST2SM', 'Assuming STD', 'WC', 'Yes')
+,('2285', '999', 'Unknown', 'STD', 'No')
+,('2285', 'ST2SMFA', 'Assuming STD', 'Unknown', 'Yes')
+,('2285', '999SMFA', 'Unknown', 'STD', 'No')
+,('2285', 'OJI', 'WC', 'Unknown', 'No')
+,('2285', 'OJISM', 'WC', 'WC', 'No')
+,('2285', 'ORPML', 'Oregon Paid Medical Leave', 'WC', 'No')
+,('2285', 'ST1', 'Assuming STD', 'Oregon Paid Medical Leave', 'Yes')
+,('2285', 'COPML', 'Colorado Paid Medical Leave', 'STD', 'No')
+,('2285', 'ST1GBW', 'Assuming STD', 'Colorado Paid Medical Leave', 'Yes')
+,('2285', 'ST2', 'Assuming STD', 'STD', 'Yes')
+,('2285', 'OJIGBW', 'WC', 'STD', 'No')
+,('2285', 'OJIGSMFA', 'WC', 'WC', 'No')
+,('2285', 'ST1GSMFA', 'Unknown', 'WC', 'No')
+,('2285', '999GBW', 'Unknown (assuming not STD)', 'Unknown', 'No')
+,('2285', '999GSMFA', 'Unknown (assuming not STD)', 'Unknown (assuming not STD)', 'No')
+,('2285', 'ST2GSMFA', 'Assuming STD', 'Unknown (assuming not STD)', 'Yes')
+,('2285', 'ST2GBW', 'Assuming STD', 'STD', 'Yes')
+,('2573', 'STDCORE', 'STD', 'STD', 'Yes')
+,('2573', 'STDBU', 'STD', 'STD', 'Yes')
+,('2573', 'OPTUMCARECORE', 'EAP', 'STD', 'No')
+,('2573', 'NYDBL', 'STD', 'EAP', 'Yes')
+,('2573', 'NJTDI', 'STD', 'STD', 'Yes')
+,('2573', 'MAPML', 'Massachusetts Paid Medical Leave', 'STD', 'No')
+,('2573', 'O360-STDCORE', 'STD', 'Massachusetts Paid Medical Leave', 'Yes')
+,('2573', 'CHCSTDCONV', 'STD', 'STD', 'Yes')
+,('2573', 'O360-STDBU', 'STD', 'STD', 'Yes')
+,('2573', 'OPSCORE', 'EAP', 'STD', 'No')
+,('2573', 'COPML', 'Colorado Paid Medical Leave', 'EAP', 'No')
+,('2573', 'STDNE', 'STD Non Eligible Employee', 'Colorado Paid Medical Leave', 'No')
+,('2573', 'OPTUMCARENE', 'EAP Non Eligible EE', 'STD Non Eligible Employee', 'No')
+,('2573', 'ORPML', 'Oregon Paid Medical Leave', 'EAP Non Eligible EE', 'No')
+,('2573', 'O360-STDNE', 'STD Non Eligible Employee', 'Oregon Paid Medical Leave', 'No')
+,('2573', 'OMGLEGACY60', 'Legacy Product', 'STD Non Eligible Employee', 'No')
+,('2573', 'LIJBU', 'Unknown (assuming not STD)', 'Legacy Product', 'No')
+,('2573', 'HSSTDCONV', 'STD Converted claims', 'Unknown (assuming not STD)', 'No')
+,('2573', 'OPSNE', 'EAP Non Eligible EE', 'STD Converted claims', 'No')
+,('2573', 'OMGLEGACYPHYS2', 'Legacy Product', 'EAP Non Eligible EE', 'No')
+,('2573', 'OMGLEGACYPHYS1', 'Legacy Product', 'Legacy Product', 'No')
+,('6172', 'CLASS2', 'Assuming STD', 'Legacy Product', 'Yes')
+,('6172', 'CLASS1', 'Assuming STD', 'STD', 'Yes')
+,('6172', 'STDNB', 'Assuming STD', 'STD', 'Yes')
+,('6172', 'SPECCLASS2', 'Assuming STD', 'STD', 'Yes')
+,('6172', 'HARRISBURG', 'Assuming STD', 'STD', 'Yes')
+,('6787', 'KOCH STD 2018', 'STD', 'STD', 'Yes')
+,('6787', 'KOCHSTDSM', 'STD', 'STD', 'Yes')
+,('6787', 'KOCHPM STD', 'STD', 'STD', 'Yes')
+,('6787', 'KOCHSTDSAL', 'STD', 'STD', 'Yes')
+,('6787', 'KOCH STD', 'STD', 'STD', 'Yes')
+,('6787', 'KOCHPINEBEND20', 'Unknown (assuming not STD)', 'STD', 'No')
+,('6787', 'STDNE', 'STD Non Eligible Employee', 'Unknown (assuming not STD)', 'No')
+,('6787', 'KOCHPINEBEND18', 'Unknown (assuming not STD)', 'STD Non Eligible Employee', 'No')
+,('6787', 'KOCHPINEBEND19', 'Unknown (assuming not STD)', 'Unknown (assuming not STD)', 'No')
+,('6787', 'KOCHSALTERM', 'Salary Continuation', 'Unknown (assuming not STD)', 'No')
+,('6787', 'KOCH PTARTHUR18', 'Unknown (assuming not STD)', 'Salary Continuation', 'No')
+,('6787', 'KOCH PTARTHUR19', 'Unknown (assuming not STD)', 'Unknown (assuming not STD)', 'No')
+,('6787', 'KOCH NY DBL', 'DBL', 'Unknown (assuming not STD)', 'Yes')
+,('6787', 'KOCHCRSTD', 'STD', 'DBL', 'Yes')
+,('6787', 'KOCHSALSTD', 'STD', 'STD', 'Yes')
+,('6787', 'KOCH PTARTHUR20', 'Unknown (assuming not STD)', 'STD', 'No')
+,('6799', 'FLEX 26WK60', 'Flex Product (Could be STD/LTD/Life)', 'Unknown (assuming not STD)', 'No')
+,('6799', 'AS U8 26WK60', 'Accident', 'Flex Product (Could be STD/LTD/Life)', 'No')
+,('6799', 'AS U24 26WK60', 'Accident', 'Accident', 'No')
+,('6799', 'FLX 26WK60 MINS', 'Flex Product (Could be STD/LTD/Life)', 'Accident', 'No')
+,('6799', 'SALCON BW20', 'Salary Continuation', 'Flex Product (Could be STD/LTD/Life)', 'No')
+,('6799', 'SALCON SM20', 'Salary Continuation', 'Salary Continuation', 'No')
+,('6799', 'AS U22 26WK50', 'Accident', 'Salary Continuation', 'No')
+,('6799', 'SALCON SM', 'Salary Continuation', 'Accident', 'No')
+,('6799', 'AS U24 36WK50', 'Accident', 'Salary Continuation', 'No')
+,('6799', 'SALCON BW', 'Salary Continuation', 'Accident', 'No')
+,('6799', 'AS U24 26WK50', 'Accident', 'Salary Continuation', 'No')
+,('6799', 'AS U22 36WK50', 'Accident', 'Accident', 'No')
+,('6799', 'AS U24 32WK50', 'Accident', 'Accident', 'No')
+,('6799', 'AS U17 BE W TER', 'Accident', 'Accident', 'No')
+,('6799', 'AS U16 26WK60', 'Accident', 'Accident', 'No')
+,('6799', 'AS U23 26WK50', 'Accident', 'Accident', 'No')
+,('6799', 'STDNE', 'STD Non Eligible Employee', 'Accident', 'No')
+,('6799', 'AS WI111 36WK', 'Accident', 'STD Non Eligible Employee', 'No')
+,('6799', 'AS U23 30WK50', 'Accident', 'Accident', 'No')
+,('6799', 'GP NY DBL', 'DBL', 'Accident', 'Yes')
+,('6799', 'FLEX 26WK50', 'Flex Product (Could be STD/LTD/Life)', 'DBL', 'Yes')
+,('6799', 'AS U13 36WK50', 'Accident', 'Flex Product (Could be STD/LTD/Life)', 'No')
+,('6799', 'SALCON WK20', 'Salary Continuation', 'Accident', 'No')
+,('6799', 'GP NY DBL-PLATT', 'DBL', 'Salary Continuation', 'Yes')
+,('6799', 'AS U21 12WK60', 'Accident', 'DBL', 'No')
+,('6799', 'AS U21 26WK50', 'Accident', 'Accident', 'No')
+,('6799', 'SALCON WK', 'Salary Continuation', 'Accident', 'No')
+,('6799', 'SALTERM', 'Leave of some kind', 'Salary Continuation', 'No')
+,('6799', 'AS U15 26WK50', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'AS U17 NOBE', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'AS U20 12WK60', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'AS U18', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'AS U20 26WK50', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'SALCON B1', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'SALCON BW-V', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'SALCON WK-V', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'SALCON BW-V20', 'Leave of some kind', 'Leave', 'No')
+,('6799', 'SALCON WK-V20', 'Leave of some kind', 'Leave', 'No')
+,('9013', 'GISALSTDW', 'STD of some kind or unknown', 'Leave', 'Yes')
+,('9013', 'GISALSTDBWSS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDBWMS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDSM', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDW', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWSS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWMS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'SRGSALSTDBWMS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'SRGSALSTDSM', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'SRGHRSTDBWMS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'STDNE', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'NYDBLW', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'NYDBLBWSS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'NYDBLBWMS', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'NYDBLSM', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDW20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDBWSS20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDBWMS20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GISALSTDSM20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDW20X', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWSS20X', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWMS20X', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDW20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWSS20', 'STD of some kind or unknown', 'STD', 'Yes')
+,('9013', 'GIHRSTDBWMS20', 'STD of some kind or unknown', 'STD', 'Yes');
 
-claimant_information AS (
-    SELECT * EXCEPT(rn) FROM (
-        SELECT
-            *,
-            ROW_NUMBER() OVER (PARTITION BY claim_uid, hr_master_uid ORDER BY raw_file_date DESC) AS rn
-        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_claimant_information`
-    )
-    WHERE rn = 1
-),
-occupation_information AS (
-    SELECT * EXCEPT(rn) FROM (
-        SELECT
-            *,
-            ROW_NUMBER() OVER (PARTITION BY hr_master_uid ORDER BY date_history_effective DESC, raw_file_date DESC) AS rn
-        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_occupation_information`
-    )
-    WHERE rn = 1
-),
-employee_information AS (
-    SELECT * EXCEPT(rn) FROM (
-        SELECT
-            *,
-            ROW_NUMBER() OVER (PARTITION BY hr_master_uid ORDER BY raw_file_date DESC) AS rn
-        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_employee_information`
-    )
-    WHERE rn = 1
-),
-benefit_summary AS (
-    SELECT * EXCEPT(rn) FROM (
-        SELECT
-            *,
-            case
-    wait_period_freq
-    when 'da' then make_interval(day => wait_period)
-    when 'we' then make_interval(day => wait_period * 7)
-    when 'bi' then make_interval(day => wait_period * 14)
-    when 'mo' then make_interval(month => wait_period)
-    else make_interval(day => wait_period)
-end as wait_period_interval,
-            case
-    max_benefit_dur_freq
-    when 'da' then make_interval(day => max_benefit_duration)
-    when 'we' then make_interval(day => max_benefit_duration * 7)
-    when 'bi' then make_interval(day => max_benefit_duration * 14)
-    when 'mo' then make_interval(month => max_benefit_duration)
-    else make_interval(day => max_benefit_duration)
-end as max_benefit_duration_interval,
-            ROW_NUMBER() OVER (PARTITION BY client_number, plan_number, line_number, coverage_number, benefit_number, benefit_version
-                                ORDER BY date_inception DESC, raw_file_date DESC) AS rn
-        FROM `eiq-production`.`sedgwick_std_snapshot`.`cln_benefit_summary`
-    )
-    WHERE rn = 1
-),
 
-terminal_table AS (
-select
-    attributes.*,
-    idmap.best_claim_id AS id_claim_group_id,
-    claimant.* except (claim_uid, client_number, raw_file_date),
-    occupation.* except (hr_master_uid, client_number, raw_file_date),
-    employee.* except (hr_master_uid, raw_file_date),
-    benefit.* except (
-        plan_number,
-        line_number,
-        coverage_number,
-        benefit_number,
-        benefit_version,
-        client_number,
-        raw_file_date,
-        max_benefit_duration
-    ),
-    client_map.client_name,
-    plan.duration as plan_duration_days,
-    /*
-        See Slack discussion[^1] for calculation logic here: Sedgwick themselves compute
-        this on the fly. We try first to use the interval provided from the plan
-        duration in our seed file[^2], per feedback from Sedgwick[^3], and fall back to
-        the benefit summary table otherwise.
-        NOTE: We are *not* currently including waiting period here as it seems to throw
-        the numbers off -- see further Slack discussion[^4].
+Select * FROM eiq-development.spencer_sedgwick_labels.benefit_id_labels;
 
-        [^1]: https://evolution.slack.com/archives/C03U3389U2Y/p1713556681373799
-        [^2]: https://github.com/EvolutionIQ/std-cdf-pipeline/blob/main/eiq/cdf_pipeline/clients/sedgwick/dbt/seeds/benefit_plan_duration.csv
-        [^3]: https://evolution.slack.com/archives/C03U3389U2Y/p1724701264041549?thread_ts=1724337956.983579&cid=C03U3389U2Y
-        [^4]: https://evolution.slack.com/archives/C04RRGAH82Y/p1723210476171699
-    */
-    cast(
-        coalesce(
-            nullif(
-                cast(date_add(attributes.date_of_loss, interval plan.duration day) as date),
-                cast(attributes.date_of_loss as date)
-            ),
-            (cast(attributes.date_of_loss as date) + benefit.max_benefit_duration_interval)
-        ) as timestamp
-    ) as max_benefit_duration,
-  coalesce(benefit_id_mapping.should_keep, true) != false AS should_keep_check
-from claim_attributes as attributes
-left join claimant_information as claimant on attributes.claim_uid = claimant.claim_uid
-left join
-    occupation_information as occupation
-    on claimant.hr_master_uid = occupation.hr_master_uid
-left join
-    employee_information as employee on claimant.hr_master_uid = employee.hr_master_uid
-left join
-    benefit_summary as benefit
-    on attributes.plan_number = benefit.plan_number
-    and attributes.line_number = benefit.line_number
-    and attributes.coverage_number = benefit.coverage_number
-    and attributes.benefit_number = benefit.benefit_number
-    and attributes.benefit_version = benefit.benefit_version
-    and attributes.client_number = benefit.client_number
-left join
-    `eiq-production`.`sedgwick_std_snapshot`.`client_number_mapping` as client_map
-    on attributes.client_number = client_map.client_number
-left join
-    `eiq-production`.`sedgwick_std_snapshot`.`benefit_plan_duration` as plan
-    on benefit.benefit_id = plan.plan_id
-    and benefit.client_number = cast(plan.client_number as string)
-left join `eiq-production`.`sedgwick_std_snapshot`.`int_id_map` as idmap on attributes.claim_uid = idmap.claim_uid
-left join
-    `eiq-production`.`sedgwick_std_snapshot`.`benefit_id_mapping` as benefit_id_mapping
-    on benefit.client_number = benefit_id_mapping.client_number
-    and benefit.benefit_id = benefit_id_mapping.benefit_id
--- Here we filter out the claims that we are fairly sure are *not* STD claims,
--- based on the benefit type. See https://evolution.slack.com/archives/C03U3389U2Y/p1724265050578749?thread_ts=1724252482.315349&cid=C03U3389U2Y
--- where coalesce(benefit_id_mapping.should_keep, true) != false
-order by attributes.claim_uid
+WITH timeslice_data AS (
+  SELECT DISTINCT
+    claim_uid,
+    client_number,
+    plan_number,
+    line_number,
+    coverage_number,
+    benefit_number,
+    benefit_version
+  FROM eiq-staging.sedgwick_std_snapshot.int_claim_timeslices
+  GROUP BY
+    claim_uid,
+    client_number,
+    plan_number,
+    line_number,
+    coverage_number,
+    benefit_number,
+    benefit_version
+),
+numbered_table AS (
+  SELECT *,
+    ROW_NUMBER() OVER (PARTITION BY claim_uid) AS row_num
+  FROM timeslice_data
+),
+timeslice_cleaned AS (
+  SELECT *
+  FROM numbered_table
+  WHERE row_num = 1
+),
+ben_data AS (
+  SELECT 
+    *,
+    ROW_NUMBER() OVER (PARTITION BY client_number, plan_number, line_number, coverage_number, 
+      benefit_number, benefit_version ORDER BY raw_file_date DESC) AS row_num
+  FROM eiq-staging.sedgwick_std_snapshot.cln_benefit_summary
+),
+ben_data_final AS (
+  SELECT *
+  FROM ben_data
+  WHERE row_num = 1
+),
+final_table AS (
+  SELECT 
+    eda.*,
+    --map.*,
+    --ts.*,
+    ben.*
+  FROM eiq-staging.sedgwick_std_snapshot.enriched_data_artifact eda
+  LEFT JOIN eiq-staging.sedgwick_std_snapshot.int_id_map map
+    ON eda.id_claim_group_id = map.best_claim_id
+  LEFT JOIN timeslice_cleaned ts
+    ON map.claim_uid = ts.claim_uid
+  LEFT JOIN ben_data_final ben
+    ON ben.client_number = ts.client_number
+    AND ben.plan_number = ts.plan_number
+    AND ben.line_number = ts.line_number
+    AND ben.coverage_number = ts.coverage_number
+    AND ben.benefit_number = ts.benefit_number
+    AND ben.benefit_version = ts.benefit_version
+),
+distinct_claims AS (
+  SELECT DISTINCT
+    id_claim_group_id,
+    benefit_id,
+    max_benefit_duration,
+    wait_period
+  FROM final_table
 )
 
--- SELECT DISTINCT claim_uid
--- FROM terminal_table
--- WHERE examiner LIKE "%tuttle%"
--- AND benefit_id IN ("FLEX 26WK60", "FLX 26WK60 MINS")
 
-SELECT n.*, tt.formatted_file_number
-FROM terminal_table AS tt
-INNER JOIN eiq-production.sedgwick_std_snapshot.cln_notes AS n
-ON tt.claim_uid = n.claim_uid
-WHERE examiner LIKE "%tuttle%"
-AND benefit_id = "AS U24 32WK50"
-AND LOWER(note_text) LIKE "%std%"
+SELECT *
+FROM (
+SELECT 
+  examiner_name,
+  benefit_id,
+  is_active_claim,
+  COUNT(id_claim_group_id) AS cnt
+FROM final_table
+WHERE is_active_claim = TRUE
+GROUP BY 
+  examiner_name,
+  benefit_id,
+  is_active_claim) final2
+LEFT JOIN eiq-development.spencer_sedgwick_labels.benefit_id_labels labels
+  ON final2.benefit_id = labels.benefit_id
+;
