@@ -171,6 +171,8 @@ timeslice_cleaned AS (
   FROM numbered_table
   WHERE row_num = 1
 ),
+
+-- gets most recent benefit data 
 ben_data AS (
   SELECT 
     *,
