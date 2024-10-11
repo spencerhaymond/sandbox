@@ -1,0 +1,15 @@
+{
+  "name": "my-remix-app",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "remix build",
+    "dev": "remix dev",
+    "start": "remix-serve build"
+  },
+  
+  "dependencies": {
+    "chart.js": "^4.4.4",
+    "react-chartjs-2": "^5.2.0"
+  }
+}
