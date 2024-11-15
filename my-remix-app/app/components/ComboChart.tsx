@@ -4,7 +4,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, LineElement, 
 import { Bar } from 'react-chartjs-2';
 import { Line } from 'react-chartjs-2';
 import { FC } from 'react';
-import React, { useRef } from 'react';
+import React from 'react';
 // Register Chart.js components
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, LineElement, PointElement, Title, Tooltip, Legend);
@@ -55,10 +55,7 @@ const ComboChart: FC<ComboChartProps> = ({ labels, barData, lineData }) => {
   };
 
     return (
-      <>
-        <Bar data={data} options={options} />
-        <Line data={data} options={options} />
-      </>
+      <Bar data={data} options={options} />
     );
   };
 
